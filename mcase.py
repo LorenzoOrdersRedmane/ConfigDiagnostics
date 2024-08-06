@@ -23,6 +23,7 @@ class Datalist:
     def create_datalists_from_jsons(datalist_jsons: list[dict]) -> dict[str, Datalist]:
         datalists: dict[str, Datalist] = {}
         for datalist_json in datalist_jsons:
+            parse_field_options(datalist_json)
             datalist_name = datalist_json["SystemName"]
             new_datalist = Datalist(datalist_name)
             new_datalist.raw_json = datalist_json
@@ -51,7 +52,7 @@ class Datalist:
 
                 # populate field options
                 if "FieldOptions" in field and field["FieldOptions"] is not None:
-                    this_field.field_options = json.loads(field["FieldOptions"])
+                    this_field.field_options = field["FieldOptions"]
 
                 # Populate dynamic fields
                 dynamic_data = field["DynamicData"]
@@ -197,3 +198,9 @@ class Workflow:
     
     def fetch_error_messages(self) -> list[str]:
         return list(map(lambda f: f"Field {self.label}: {f}", self.error_messages))
+
+
+def parse_field_options(dict_in: dict):
+    for field in dict_in["Fields"]:
+        if field["FieldOptions"] is not None:
+            field["FieldOptions"] = json.loads(field["FieldOptions"])
